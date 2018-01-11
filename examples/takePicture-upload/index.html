@@ -4,8 +4,35 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
         <title>拍照上传</title>
+        <link rel="stylesheet" href="index.css"/>
+        <script type='text/javascript' src='index.js' charset='utf-8'></script>
     </head>
     <body>
+         <div class="content">
+            <div class="label">身份证</div>
+            <div class="img-area">
+                <div class="container">
+                    <input type="file" id='id-face'  accept="image/*" />
+                    <div id='face-empty-result'>
+                        <img style='width:4rem' src="resource/camera.png" alt="">
+                        <p>身份证正面照</p>
+                    </div>
+                    <img style='width: 100%' id='face-result'/>
+                </div>
+
+                <div class="container" style='margin-top:0.5rem;'>
+                    <input type="file" id='id-back'  accept="image/*" />
+                    <div id='back-empty-result'>
+                        <img style='width:4rem' src="resource/camera.png" alt="">
+                        <p>身份证反面照</p>
+                    </div>
+                    <img style='width: 100%' id='back-result'/>
+                </div>
+            </div>
+         </div>
          
+         <div class="btn">
+            提交
+         </div>
     </body>
 </html>
