@@ -1,6 +1,18 @@
  window.onload=function(){
     setSlide();
+    var elems=document.getElementsByClassName("action-delete");
+    for(var i=0;i<elems.length;i++){
+        elems[i].addEventListener("click", function(){     
+            var r=confirm("确定要删除该记录吗?")
+            if (r){
+              alert("呵呵呵");
+            }else{
+              alert("哈哈哈");
+            }
+        });
+    }
  };
+ 
  function setSlide() {
     //侧滑显示删除按钮
     var expansion = null; //是否存在展开的list
@@ -12,11 +24,14 @@
             y = event.changedTouches[0].pageY;
             swipeX = true;
             swipeY = true;
-            if (expansion) { //判断是否展开，如果展开则收起
-                removeClass(this,"swipeleft");
+            if (expansion) { //判断是否展开
+                //如果展开则收起 以下代码取消注释后则滑动开始立即收起 注释后则向右滑动一定距离后收起隐藏按钮
+                //方法一.
+                //removeClass(this,"swipeleft");
+                //方法二 需引入jquery
                 //$(this).removeClass("swipeleft");
             }
-        });     
+        });
         container[i].addEventListener('touchmove', function (event) {
             X = event.changedTouches[0].pageX;
             Y = event.changedTouches[0].pageY;

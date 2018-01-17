@@ -1,4 +1,6 @@
+/*必须overflow-x:hidden 否则网页会整体出现横向滚动*/
 body{background-color: #eee;margin:0;overflow-y:scroll;overflow-x:hidden}
+/*内容宽度占据整个页面宽度 使按钮被隐藏*/
 .item-container{width:100%;padding:0.5rem;background-color: #fff;display: flex;align-items: center;height: 3.5rem}
 .item-container img{height: 3.5rem;width: 3.5rem}
 .content{flex:1;margin: 0 1rem}
@@ -8,6 +10,16 @@ body{background-color: #eee;margin:0;overflow-y:scroll;overflow-x:hidden}
 .allow-right{width:2rem;height: 3.5rem;background:transparent url(resource/allow_right.png) no-repeat;background-size:1.5rem 1.5rem;background-position: center}
 .action-delete{background:#C95454}
 .action-edit{background:#00BCD4}
+/*-webkit-transition:all 0.3s linear;transition:all 0.3s linear;使浏览器出现滑动效果
+width: 140%;内容占100% 两个按钮各占20% ，根据按钮数量和宽度调整
+overflow: hidden;必须 否则会出现横向滚动条
+*/
 .swipe-container{ margin-bottom:0.5rem; overflow: hidden; width: 140%;display: flex;-webkit-transition:all 0.3s linear;transition:all 0.3s linear;}
+/*width:20%; 和swipe-container width: 140%;相对应*/
 .swipe-container .action{width:20%;text-align:center;color:#fff;padding:0.5rem 0;line-height: 3.5rem;}
-.swipeleft{transform:translateX(-28%);-webkit-transform:translateX(-28%);}
+/*
+使元素向左滑动之后显示被隐藏的按钮 此处不知道原理 写40%不行 
+大概是因为此处的宽度是以swipe-container的总宽度为100%来计算，按钮的宽度20%则时以网页的宽度为100%来计算的，即 ：100*(20%)=140*(14.25%)
+根据按钮数量和宽度调整
+*/
+.swipeleft{transform:translateX(-28.5%);-webkit-transform:translateX(-28.5%);}
