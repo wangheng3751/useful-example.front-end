@@ -1,0 +1,28 @@
+body,ul,ol,li,p,h1,h2,h3,h4,h5,h6,form,fieldset,table,td,img,div{margin:0;padding:0;border:0;}
+body{color:#333; font-size:12px;font-family:"Microsoft YaHei"}
+ul,ol{list-style-type:none;}
+select,input,img,select{vertical-align:middle;}
+input{ font-size:12px;}
+a{ text-decoration:none; color:#000;}
+a:hover{color:#c00; text-decoration:none;}
+.clear{clear:both;}
+
+/* 大转盘样式 */
+.banner{display:block;width:85%;margin-left:auto;margin-right:auto;margin-bottom: 20px;}
+.banner .turnplate{display:block;width:100%;position:relative;}
+.banner .turnplate canvas.item{width:100%;}
+.banner .turnplate img.pointer{position:absolute;width:31.5%;height:42.5%;left:34.6%;top:23%;}
+
+.desc{margin:20px;font-size:14px;line-height:25px}
+.summary{display:flex;margin:0 auto;width:75%;font-size:14px}
+.company-desc{text-align:center;margin-bottom:30px}
+.timer-box{width:85%;background-color:#fff;height:40px;margin:10px auto;line-height:40px;text-align:center;font-size:15px}
+.history{width:100%;height:100%;background-color: #fff;display: none;}
+.user-name{flex:1}
+.user-name div{float:left;margin-left:10px;margin-top:6px}
+.item-box{border-bottom:2px #000 solid;padding:5px;margin:10px auto;width:85%}
+.item-content-box{display:flex;width:85%;margin-left:7.5%}
+.item-label{width:120px;margin-top:6px}
+.colse{width:30px;position:absolute;top:10px;right:5px}
+.result-box{background-color:transparent;display: none;width:100%;height:100%;color:#fff}
+.result-box div{width: 65%;margin: 0 auto;}

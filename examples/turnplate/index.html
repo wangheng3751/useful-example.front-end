@@ -1,0 +1,339 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>大转盘活动</title>
+
+<link href="style.css" rel="stylesheet" type="text/css">
+
+<script type="text/javascript" src="js/jquery-1.10.2.js"></script>
+<script type="text/javascript" src="js/awardRotate.js"></script>
+
+<script type="text/javascript">
+var turnplate={
+		restaraunts:[],				//大转盘奖品名称
+		colors:[],					//大转盘奖品区块对应背景颜色
+		outsideRadius:192,			//大转盘外圆的半径
+		textRadius:155,				//大转盘奖品位置距离圆心的距离
+		insideRadius:68,			//大转盘内圆的半径
+		startAngle:0,				//开始角度
+		randomRate:[],              //控制获奖率，百分制(相加需等于100%)，对应restaraunts(顺序需要保持一致)，
+		bRotate:false				//false:停止;ture:旋转
+};
+
+$(document).ready(function(){
+	//动态添加大转盘的奖品与奖品区域背景颜色
+	turnplate.randomRate = ["20%", '20%', '20%', '13%', '20%', '7%'];  //小心设置按100%分配
+	turnplate.restaraunts = ["谢谢参与", "一等奖", "谢谢参与", "二等奖", "谢谢参与", "三等奖"];
+	turnplate.colors = ["#FFF4D6", "#FFFFFF", "#FFF4D6", "#FFFFFF","#FFF4D6", "#FFFFFF"];
+
+	
+	var rotateTimeOut = function (){
+		$('#wheelcanvas').rotate({
+			angle:0,
+			animateTo:2160,
+			duration:8000,
+			callback:function (){
+				alert('网络超时，请检查您的网络设置！');
+			}
+		});
+	};
+
+	//旋转转盘 item:奖品位置; txt：提示语;
+	var rotateFn = function (item, txt){
+		var angles = item * (360 / turnplate.restaraunts.length) - (360 / (turnplate.restaraunts.length*2));
+		if(angles<270){
+			angles = 270 - angles; 
+		}else{
+			angles = 360 - angles + 270;
+		}
+		$('#wheelcanvas').stopRotate();
+		$('#wheelcanvas').rotate({
+			angle:0,
+			animateTo:angles+1800,
+			duration:8000,
+			callback:function (){
+				if(txt=='谢谢参与'){
+					onResult(false);
+				}else{
+					onResult(true);
+				}
+				turnplate.bRotate = !turnplate.bRotate;
+			}
+		});
+	};
+
+	$('.pointer').click(function (){
+		if(turnplate.bRotate)return;
+		turnplate.bRotate = !turnplate.bRotate;
+		//获取随机数(奖品个数范围内)
+		var item = rnd(turnplate.randomRate);//可通过直接传入值turnplate.randomRate控制中奖
+		//奖品数量等于10,指针落在对应奖品区域的中心角度[252, 216, 180, 144, 108, 72, 36, 360, 324, 288]
+		rotateFn(item, turnplate.restaraunts[item-1]);
+	});
+});
+
+function rnd(rate){
+	var random = Math.floor(Math.random() * 100);
+	var myRandom = [];
+	var randomList = [];
+	var randomParent = [];
+	for(var i = 0; i < 100; i++){
+		myRandom.push(parseInt([i]) + 1);
+	}
+	for(var i = 0; i < rate.length; i++){
+		var temp = [];
+		var start = 0;
+		var end = 0;
+		randomList.push(parseInt(rate[i].split('%')[0]));
+		for(var j = 0; j < randomList.length; j++){
+			start += randomList[j-1] || 0
+			end += randomList[j]
+		}
+		temp = myRandom.slice(start, end);
+		randomParent.push(temp)
+	}
+	for(var i = 0; i < randomParent.length; i++){
+		if($.inArray(random, randomParent[i]) > 0){
+			return(i+1)
+		}
+	}
+	
+}
+
+
+//页面所有元素加载完毕后执行drawRouletteWheel()方法对转盘进行渲染
+window.onload=function(){
+	drawRouletteWheel();
+};
+
+function drawRouletteWheel() {    
+  var canvas = document.getElementById("wheelcanvas");    
+  if (canvas.getContext) {
+	  //根据奖品个数计算圆周角度
+	  var arc = Math.PI / (turnplate.restaraunts.length/2);
+	  var ctx = canvas.getContext("2d");
+	  //在给定矩形内清空一个矩形
+	  ctx.clearRect(0,0,422,422);
+	  //strokeStyle 属性设置或返回用于笔触的颜色、渐变或模式  
+	  ctx.strokeStyle = "#FFBE04";
+	  //font 属性设置或返回画布上文本内容的当前字体属性
+	  ctx.font = '16px Microsoft YaHei';      
+	  for(var i = 0; i < turnplate.restaraunts.length; i++) {       
+		  var angle = turnplate.startAngle + i * arc;
+		  ctx.fillStyle = turnplate.colors[i];
+		  ctx.beginPath();
+		  //arc(x,y,r,起始角,结束角,绘制方向) 方法创建弧/曲线（用于创建圆或部分圆）    
+		  ctx.arc(211, 211, turnplate.outsideRadius, angle, angle + arc, false);    
+		  ctx.arc(211, 211, turnplate.insideRadius, angle + arc, angle, true);
+		  ctx.stroke();  
+		  ctx.fill();
+		  //锁画布(为了保存之前的画布状态)
+		  ctx.save();   
+		  
+		  //----绘制奖品开始----
+		  ctx.fillStyle = "#E5302F";
+		  var text = turnplate.restaraunts[i];
+		  var line_height = 17;
+		  //translate方法重新映射画布上的 (0,0) 位置
+		  ctx.translate(211 + Math.cos(angle + arc / 2) * turnplate.textRadius, 211 + Math.sin(angle + arc / 2) * turnplate.textRadius);
+		  
+		  //rotate方法旋转当前的绘图
+		  ctx.rotate(angle + arc / 2 + Math.PI / 2);
+		  
+		  /** 下面代码根据奖品类型、奖品名称长度渲染不同效果，如字体、颜色、图片效果。(具体根据实际情况改变) **/
+		  if(text.indexOf("M")>0){//流量包
+			  var texts = text.split("M");
+			  for(var j = 0; j<texts.length; j++){
+				  ctx.font = j == 0?'bold 20px Microsoft YaHei':'16px Microsoft YaHei';
+				  if(j == 0){
+					  ctx.fillText(texts[j]+"M", -ctx.measureText(texts[j]+"M").width / 2, j * line_height);
+				  }else{
+					  ctx.fillText(texts[j], -ctx.measureText(texts[j]).width / 2, j * line_height);
+				  }
+			  }
+		  }else if(text.indexOf("M") == -1 && text.length>6){//奖品名称长度超过一定范围 
+			  text = text.substring(0,6)+"||"+text.substring(6);
+			  var texts = text.split("||");
+			  for(var j = 0; j<texts.length; j++){
+				  ctx.fillText(texts[j], -ctx.measureText(texts[j]).width / 2, j * line_height);
+			  }
+		  }else{
+			  //在画布上绘制填色的文本。文本的默认颜色是黑色
+			  //measureText()方法返回包含一个对象，该对象包含以像素计的指定字体宽度
+			  ctx.fillText(text, -ctx.measureText(text).width / 2, 0);
+		  }
+		  
+		  //添加对应图标
+		  if(text.indexOf("奖")>0){
+			  var img= document.getElementById("shan-img");
+			  img.onload=function(){  
+				  ctx.drawImage(img,-15,10);      
+			  }; 
+			  ctx.drawImage(img,-15,10);  
+		  }else if(text.indexOf("谢谢参与")>=0){
+			  var img= document.getElementById("sorry-img");
+			  img.onload=function(){  
+				  ctx.drawImage(img,-15,10);      
+			  };  
+			  ctx.drawImage(img,-15,10);  
+		  }
+		  //把当前画布返回（调整）到上一个save()状态之前 
+		  ctx.restore();
+		  //----绘制奖品结束----
+	  }     
+  } 
+}
+
+function openHistory(){
+	var width=(document.body.clientWidth*0.85)+"px";
+	var height=(document.body.clientHeight*0.9)+"px";
+	layer.open({
+		type: 1,
+		title: false,
+		closeBtn: 0,
+		area: [width, height],
+		content: $('.history'),
+		cancel: function(){
+			
+		}
+	});
+}
+
+function onResult(success){
+	var width=(document.documentElement.clientWidth || document.body.clientWidth)+"px";
+	var height=(document.documentElement.clientHeight || document.body.clientHeight)+"px";
+	layer.open({
+		type: 1,
+		title: false,
+		closeBtn: 0,
+		shade: 0,
+		id:'success-modal',
+		area: [width, height],
+		content: success?$('#success-box'):$('#failure-box'),
+		success: function(){
+			$(".layui-layer").css("background-color","rgba(0,0,0,0.7)");
+		}
+	});
+}
+</script>
+</head>
+<body style="background:#FFEAA8;overflow-x:hidden;">
+    <img src="images/1.png" id="shan-img" style="display:none;" />
+	<img src="images/2.png" id="sorry-img" style="display:none;" />
+	<div style='text-align:center;margin-top:1rem'>
+		<img src="images/logo.png" style="width:150px"/>
+	</div>
+	<p class="desc">这里是活动简介，这里是活动简介，这里是活动简介，这里是活动简介，这里是活动简介，这里是活动简介。</p>
+	<div class="banner">
+		<div class="turnplate" style="background-image:url(images/turnplate-bg.png);background-size:100% 100%;margin-top:20px;">
+			<canvas class="item" id="wheelcanvas" width="422px" height="422px"></canvas>
+			<img class="pointer" src="images/turnplate-pointer.png"/>
+		</div>
+	</div>
+	<div class='summary'>
+		<div style='flex:1'>您本时段抽奖次数<span style='color:red'>&nbsp;1&nbsp;</span>次</div>
+		<div onclick="openHistory()">往期中奖名单</div>
+	</div>
+	<div class='timer-box'>
+		本时段抽奖结束还有：24分55秒
+	</div>
+	<div class='company-desc'>本活动由XXXX提供奖品及技术支持</div>
+	<!--中奖纪录弹窗内容-->
+	<div class='history'>
+		<div class="colse" onclick="layer.closeAll();">关闭</div>
+		<div style='text-align:center'>
+			<img src="images/logo.png" style="width:120px;margin-top:5px"/>
+		</div>
+		<div class="item-box">2018年3月9日 9点中奖名单</div>
+		<div class="item-content-box">
+			<div class="item-label">一等奖</div>
+			<div class="user-name">
+				<div>王XX</div>
+				<div>王XXXX</div>
+				<div>李XX</div>
+				<div>李XXXXXX</div>
+				<div>XXXX</div>
+			</div>
+		</div>
+
+		<div class="item-content-box">
+			<div class="item-label">二等奖</div>
+			<div class="user-name">
+				<div>XX</div>
+				<div>XXXX</div>
+				<div>XXXXXX</div>
+				<div>XX</div>
+				<div>XXXXXXXX</div>
+			</div>
+		</div>
+
+		<div class="item-content-box">
+			<div class="item-label">三等奖</div>
+			<div class="user-name">
+				<div>XX</div>
+				<div>XXXX</div>
+				<div>XXXXXX</div>
+				<div>XX</div>
+				<div>XXXXXXXX</div>
+			</div>
+		</div>
+
+		<div class="item-box">2018年3月9日 8点中奖名单</div>
+		<div class="item-content-box">
+			<div class="item-label">一等奖</div>
+			<div class="user-name">
+				<div>XX</div>
+				<div>XXXX</div>
+				<div>XXXXXX</div>
+				<div>XX</div>
+				<div>XXXXXXXX</div>
+			</div>
+		</div>
+
+		<div class="item-content-box">
+			<div class="item-label">二等奖</div>
+			<div class="user-name">
+				<div>XX</div>
+				<div>XXXX</div>
+				<div>XXXXXX</div>
+				<div>XX</div>
+				<div>XXXXXXXX</div>
+			</div>
+		</div>
+
+		<div class="item-content-box">
+			<div class="item-label">三等奖</div>
+			<div class="user-name">
+				<div>XX</div>
+				<div>XXXX</div>
+				<div>XXXXXX</div>
+				<div>XX</div>
+				<div>XXXXXXXX</div>
+			</div>
+		</div>
+
+	</div>
+
+	<!--未中奖提示层-->
+	<div class='result-box' id='failure-box' onclick='layer.closeAll();'>
+		<div style='font-size:25px;margin-top:40%'>老铁！没中咋办！</div>
+		<div style='font-size:18px;margin:8px auto'>别桑心</div>
+		<div style="font-size:16px;color:#f18518">此处省略N个字。。。。。</div>
+		<div style='font-size:24px;margin-top:20px'>大吉大利 今晚吃鸡</div>
+	</div>
+
+	<!--中奖提示层-->
+	<div class='result-box' id='success-box' onclick='layer.closeAll();'>
+		<div style='font-size:25px;margin-top:40%'>老铁！运气爆表！</div>
+		<div style='font-size:18px;margin:8px auto'>恭喜你抽到</div>
+		<div style="font-size:16px;color:#f18518">一等奖</div>
+		<div style='font-size:16px;margin:6px auto'>请在xxxx领取奖品</div>
+		<div style='font-size:24px;margin-top:20px'>大吉大利 今晚吃鸡</div>
+	</div>
+
+	<script type="text/javascript" src="js/layer-v3.1.1/layer.js"></script>
+</body>
+</html>

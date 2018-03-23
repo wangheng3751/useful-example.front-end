@@ -5,3 +5,5 @@
 -1. takePicture-upload 拍照上传
 
 -2.sideslipping 侧滑显示
+
+-3.turnplate 转盘抽奖
