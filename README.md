@@ -7,3 +7,5 @@
 -2.sideslipping 侧滑显示
 
 -3.turnplate 转盘抽奖
+
+-4.takePicture-camera 拍照上传-屏蔽本地选择
