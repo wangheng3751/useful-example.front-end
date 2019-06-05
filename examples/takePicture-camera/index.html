@@ -1,0 +1,162 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+    <meta name=viewport content="width=device-width,initial-scale=1">
+    <title>拍照上传图片</title>
+    <meta charset="utf-8">
+    <script src="https://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+    <style>
+        .container{
+            background-color:#e7e7e7;
+            position: relative;
+        }
+        .container div{
+            text-align: center;
+            padding:0.5rem 0
+        }
+        .container input{
+            opacity:0;
+            filter:alpha(opacity=0);
+            height: 100%;
+            width: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 9;
+        }
+        button{
+            margin-top: 10px
+        }
+        #imgTag{
+            display: none;
+            margin: 10px auto;
+        }
+    </style>
+
+    <script>
+        var mediaStreamTrack=null;
+        window.URL = (window.URL || window.webkitURL || window.mozURL || window.msURL);
+        var promisifiedOldGUM = function(constraints) {
+            var getUserMedia = (navigator.getUserMedia ||
+                navigator.webkitGetUserMedia || navigator.mozGetUserMedia);
+            if (!getUserMedia) {
+                return Promise.reject(new Error('您的浏览器不支持此功能'));
+            }
+            return new Promise(function (resolve, reject) {
+                getUserMedia.call(navigator, constraints, resolve, reject);
+            });
+        };
+        if(navigator.mediaDevices === undefined) {
+            navigator.mediaDevices = {};
+        }
+        if(navigator.mediaDevices.getUserMedia === undefined) {
+            navigator.mediaDevices.getUserMedia = promisifiedOldGUM;
+        }
+
+        function openMedia() {
+            $("#video,#ok-btn").show();
+            var videos=[];
+            navigator.mediaDevices.enumerateDevices().then(function(devices) {
+                devices.forEach(function (dv) {
+                    var kind = dv.kind;
+                    if (kind.match(/^video.*/)) {
+                        videos.push(dv.deviceId);
+                    }
+                });
+                var constraints = {
+                    video: {
+                        width: width,
+                        height: height,
+                        deviceId:videos[1]
+                    },
+                    audio: true
+                };
+                //获得video摄像头
+                var video = document.getElementById('video');     
+                var promise = navigator.mediaDevices.getUserMedia(constraints);
+                promise.then((mediaStream) => {
+                    mediaStreamTrack = typeof mediaStream.stop === 'function' ? mediaStream : mediaStream.getTracks()[1];
+                    if ("srcObject" in video) {
+                        video.srcObject = mediaStream;
+                    } else {
+                        video.src = window.URL.createObjectURL(mediaStream);
+                    }
+                    video.play();
+                    video.onloadedmetadata = function(){
+                        height=width/(this.videoWidth/this.videoHeight);//计算摄像区域实际高度
+                    }
+                });
+                promise.catch(function (err) {
+                    alert("您的浏览器不支持此功能");
+                });
+            }); 
+        }
+     
+        // 拍照
+        function takePhoto() {
+            $("#canvas").attr("width",width).attr("height",height);
+            //获得Canvas对象
+            var video = document.getElementById('video');
+            var canvas = document.getElementById('canvas');
+            var ctx = canvas.getContext('2d');
+            ctx.drawImage(video, 0, 0, width, height);
+            var img = document.getElementById('canvas').toDataURL();
+            document.getElementById('imgTag').src=img;
+            $("#video").hide();
+            $("#imgTag").show();
+            closeMedia();
+        }
+     
+        // 关闭摄像头
+        function closeMedia() {
+            mediaStreamTrack.stop();
+        }
+
+        var width=0;//拍照区域宽度
+        var height=0;//拍照区域高度
+        $(document).ready(function(){
+            width=document.body.clientWidth*0.8;
+            $("#imgTag").css("width",width+'px');
+            var u = navigator.userAgent;
+            var isiOS = !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/);
+            if(isiOS){
+                $("#ios-box").show();
+            }else{
+                $("#video").attr("width",width);
+                $("#android-box").show();
+            }
+        });
+
+        function onFileChange(fileObj){
+            var windowURL = window.URL || window.webkitURL;
+            var dataURL;
+            var imgObj = document.getElementById("imgTag");
+            imgObj.style.display="block";
+            if (fileObj && fileObj.files && fileObj.files[0]) {
+                dataURL = windowURL.createObjectURL(fileObj.files[0]);
+                imgObj.src=dataURL;
+            } else {
+                dataURL = fileObj.value;
+                imgObj.style.filter = "progid:DXImageTransform.Microsoft.AlphaImageLoader(sizingMethod=scale)";
+                imgObj.filters.item("DXImageTransform.Microsoft.AlphaImageLoader").src = dataURL;
+            }
+        }
+    </script>
+</head>
+<body>
+    <div class="container" id="ios-box" style="display: none">
+        <input type="file" accept="image/*" capture="camera" onchange="onFileChange(this)"/>
+        <div>
+            拍照上传
+        </div>
+    </div>  
+    <div style="display: none;text-align: center" id="android-box">
+        <button onclick="openMedia()">拍照上传</button><br/><br/>
+        <video id="video" style="display: none" autoplay="autoplay"></video><br/>
+        <canvas id="canvas" style="display: none"></canvas>       
+        <button onclick="takePhoto()" id="ok-btn" style="display: none">拍照</button><br/><br/>
+    </div>  
+    <div style="text-align: center">
+        <img id="imgTag"  alt="imgTag"><br/>
+    </div> 
+</body>
